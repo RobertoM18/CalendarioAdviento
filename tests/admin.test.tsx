@@ -1,0 +1,22 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import Admin from '../src/components/Admin';
+import { defaultSettings } from '../src/lib';
+
+const state=vi.hoisted(()=>({tables:{} as Record<string,Record<string,unknown>[]>,rpc:vi.fn()}));
+vi.mock('../src/lib',async importOriginal=>{const original=await importOriginal<typeof import('../src/lib')>();return {...original,db:()=>({from:(table:string)=>{
+ const filters:Record<string,unknown>={};let patch:Record<string,unknown>|null=null;
+ function rows(){let selected=state.tables[table].filter(row=>Object.entries(filters).every(([key,value])=>row[key]===value));if(patch){selected.forEach(row=>Object.assign(row,patch,{updated_at:'2026-11-24T20:00:00.000Z'}));patch=null;}return structuredClone(selected);}
+ const query={select:()=>query,order:()=>query,eq:(key:string,value:unknown)=>{filters[key]=value;return query;},update:(value:Record<string,unknown>)=>{patch=value;return query;},single:async()=>{const data=rows()[0];return {data,error:data?null:{message:'Conflicto'}};},then:(resolve:(v:unknown)=>void)=>Promise.resolve({data:rows(),error:null}).then(resolve)};return query;
+ },rpc:state.rpc,storage:{from:()=>({remove:async()=>({error:null})})}})};});
+vi.mock('../src/components/LetterModal',()=>({default:({letter,onClose}:{letter:{content:string};onClose:()=>void})=><div role="dialog"><p>{letter.content}</p><button onClick={onClose}>Cerrar previsualización</button></div>,Photo:()=>null}));
+beforeEach(()=>{state.rpc.mockReset();const content={title:'',content:'',dedication:'',content_type:'Carta',image_paths:[],music_url:'',celebration_message:''};state.tables={letters:[{...content,id:'letter-1',day:1,unlock_at:'2026-12-01T05:00:00Z',is_published:false,updated_at:'2026-11-24T19:00:00.000Z'}],letter_drafts:[{...content,letter_id:'letter-1',updated_at:'2026-11-24T19:00:00.000Z'}]};state.rpc.mockImplementation(async(name:string)=>{if(name==='publish_letter')Object.assign(state.tables.letters[0],state.tables.letter_drafts[0],{is_published:true});return {error:null};});});
+afterEach(()=>cleanup());
+describe('Editor privado',()=>{
+ it('empieza vacío y exige título y contenido para publicar',async()=>{render(<Admin settings={defaultSettings} onSettings={()=>{}}/>);await screen.findByLabelText('Título');expect((screen.getByLabelText('Título') as HTMLInputElement).value).toBe('');expect((screen.getByRole('button',{name:'Publicar',exact:true}) as HTMLButtonElement).disabled).toBe(true);});
+ it('guardar un borrador no publica y conserva saltos de línea',async()=>{const user=userEvent.setup();render(<Admin settings={defaultSettings} onSettings={()=>{}}/>);await user.type(await screen.findByLabelText('Título'),'Mis propias palabras');await user.type(screen.getByLabelText('Lo que quieres decirle'),'Una primera línea\nY otra más.');await user.click(screen.getByRole('button',{name:'Guardar borrador'}));await screen.findByText('Borrador guardado. Solo tú puedes verlo.');expect(state.tables.letter_drafts[0].content).toBe('Una primera línea\nY otra más.');expect(state.tables.letters[0].content).toBe('');expect(state.rpc).not.toHaveBeenCalled();});
+ it('previsualizar no publica ni registra lecturas',async()=>{const user=userEvent.setup();render(<Admin settings={defaultSettings} onSettings={()=>{}}/>);await user.type(await screen.findByLabelText('Lo que quieres decirle'),'Solo una vista previa');await user.click(screen.getByRole('button',{name:'Previsualizar'}));expect(await screen.findByRole('dialog')).toBeTruthy();expect(state.tables.letter_drafts[0].content).toBe('');expect(state.rpc).not.toHaveBeenCalled();});
+ it('publica explícitamente la versión guardada',async()=>{const user=userEvent.setup();render(<Admin settings={defaultSettings} onSettings={()=>{}}/>);await user.type(await screen.findByLabelText('Título'),'Para ti');await user.type(screen.getByLabelText('Lo que quieres decirle'),'Estas palabras las elegí yo.');await user.click(screen.getByRole('button',{name:'Publicar',exact:true}));await screen.findByText('Carta publicada. Solo podrá leerla cuando llegue su día.');expect(state.rpc).toHaveBeenCalledWith('publish_letter',{target:'letter-1',expected_updated_at:'2026-11-24T20:00:00.000Z'});expect(state.tables.letters[0].content).toBe('Estas palabras las elegí yo.');expect(state.tables.letters[0].unlock_at).toBe('2026-12-01T05:00:00Z');});
+});
