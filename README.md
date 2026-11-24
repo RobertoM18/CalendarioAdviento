@@ -18,7 +18,7 @@ Abre la dirección que muestra Vite. Sin variables de Supabase verás una pantal
 
 1. Crea un proyecto en [Supabase](https://supabase.com/dashboard). Conserva la contraseña de la base fuera del repositorio.
 2. En **Authentication → Sign In / Providers**, desactiva **Allow new users to sign up** y el acceso anónimo. Mantén email/contraseña habilitado. No basta con ocultar un botón de registro: debes desactivarlo en el servicio.
-3. Abre **SQL Editor** y ejecuta una sola vez el archivo `supabase/migrations/202611240001_initial.sql`. Contiene tablas, índices, restricciones, RLS, funciones y bucket privado `letter-photos`. No ejecutes scripts de pruebas contra tu proyecto real.
+3. Abre **SQL Editor** y ejecuta una sola vez, en orden, `supabase/migrations/202611240001_initial.sql` y `supabase/migrations/202611240002_backup_access.sql`. Contienen tablas, índices, restricciones, RLS, funciones, bucket privado `letter-photos` y permiso de lectura para respaldos del servidor. No ejecutes scripts de pruebas contra tu proyecto real.
 4. En **Authentication → Users → Add user**, crea exactamente las dos cuentas con correo y contraseña distintos. Puedes confirmar los correos manualmente desde la creación administrativa. No envíes invitaciones automáticamente si prefieres entregar tú las contraseñas.
 5. Copia los UUID reales de ambas cuentas y ejecuta este SQL reemplazando los textos de ejemplo:
 
@@ -139,6 +139,8 @@ Antes de entregar el enlace, con Supabase configurado:
 
 Verificado localmente el 24 de noviembre de 2026: compilación de producción correcta, 12 pruebas de calendario/editor y 53 comprobaciones PostgreSQL superadas, y `npm audit` sin vulnerabilidades reportadas. Revisión visual del calendario en navegador con ancho móvil y de escritorio: 24 sobres presentes, sin desbordamiento horizontal y sin errores de consola. Se comprobó el aviso de sobres bloqueados y el flujo de bienvenida. El editor se verificó mediante pruebas de interacción con respuestas simuladas, complementadas por las pruebas SQL; aún no se ha validado contra un proyecto Supabase real ni en teléfonos físicos.
 
-Implementados los componentes y la preparación de despliegue. Para tener un enlace real faltan tus recursos externos: proyecto de Supabase, dos cuentas, aplicación de la migración, variables de entorno, repositorio privado de GitHub y despliegue de Vercel. No hay credenciales falsas ni una conexión simulada presentada como real.
+Supabase conectado el 24 de noviembre de 2026: migraciones aplicadas al proyecto real, 24 cartas y 24 borradores vacíos, cero publicaciones, RLS habilitado en las cinco tablas y bucket de fotos privado. Registro público y acceso anónimo desactivados. Se verificó mediante la API que las cinco tablas deniegan consultas sin sesión y que Auth tiene el registro cerrado. La compilación con la conexión real se completó y `.env` está excluido de Git. Las migraciones se ejecutaron desde SQL Editor; el historial de migraciones de la CLI no se ha sincronizado, por lo que no debes volver a aplicar la inicial al proyecto existente.
+
+Pendiente: crear las dos cuentas, asignar sus perfiles y probar el acceso autenticado; después conectar el repositorio privado de GitHub y desplegar en Vercel. No se ha publicado todavía un enlace de la aplicación.
 
 Documentación oficial consultada: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Storage privado](https://supabase.com/docs/guides/storage/security/access-control), [Tailwind con Vite](https://tailwindcss.com/docs/installation/using-vite).
