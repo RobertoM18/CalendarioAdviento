@@ -1,0 +1,23 @@
+AJUSTE AL PROMPT: CONTENIDO PERSONALIZABLE
+
+Estas instrucciones sustituyen cualquier requisito del prompt original que obligue a generar o mostrar textos románticos predefinidos, incluido el cierre del día 24.
+
+1. Crear las 24 cartas con su día y fecha de desbloqueo, pero con título, contenido y dedicatoria vacíos y en estado de borrador. Las temáticas del prompt son sugerencias opcionales del administrador; nunca contenido publicado automáticamente.
+
+2. Desde mi cuenta privada en /admin debo poder escribir y modificar el título, tipo, texto completo, dedicatoria, fotografías y canción de cada carta. Conservar párrafos y saltos de línea. No requerir cambios de código ni un nuevo despliegue.
+
+3. Ofrecer acciones separadas: Guardar borrador, Previsualizar, Publicar y Retirar publicación. Publicar requiere título y contenido no vacíos. Previsualizar no modifica fechas ni el progreso de lectura de mi novia. Advertir antes de abandonar cambios sin guardar y confirmar el guardado solo cuando Supabase lo complete.
+
+4. Si edito una carta publicada, guardar los cambios en un borrador privado separado. Mi novia seguirá viendo la versión publicada hasta que pulse Publicar cambios. Retirar la publicación no elimina la carta ni su historial de lectura.
+
+5. Mi novia solo podrá consultar cartas publicadas cuya fecha de desbloqueo haya llegado, validada desde el servidor en America/Guayaquil. Si llega el día sin carta publicada, mostrar únicamente “Estoy preparando algo especial para ti”. Nunca mostrar borradores, textos de ejemplo ni campos vacíos.
+
+6. El texto completo del día 24, su cierre y el mensaje de celebración también serán editables. No incluir automáticamente la declaración final del prompt: solo mostrarla si yo la escribo o la elijo explícitamente. Los campos de contenido personal comienzan vacíos.
+
+7. Guardar contenido y borradores en Supabase. Proteger su lectura y edición mediante RLS; solo el administrador accede a borradores. Ningún texto privado de cartas debe estar incrustado en el frontend ni en archivos públicos. Las fotografías de borradores también deben permanecer privadas.
+
+8. Las semillas crean únicamente los 24 registros vacíos y no publicados. Volver a ejecutar semillas o migraciones nunca debe sobrescribir cartas personalizadas existentes.
+
+9. Verificar: edición sin redesplegar; persistencia tras recargar; separación entre borrador y publicación; bloqueo de cartas futuras aunque estén publicadas; imposibilidad de leer o editar borradores mediante la cuenta de mi novia; personalización completa del día 24; conservación del progreso al editar o retirar una publicación.
+
+El resto de los requisitos del prompt original se mantiene.
