@@ -15,6 +15,9 @@ await pg.exec(`create role anon;create role authenticated;create schema auth;cre
 // All policy expressions, grants, constraints and RPC bodies otherwise remain the actual migration.
 await pg.exec(`create schema private;create function private.test_clock() returns timestamptz language sql stable as $$ select coalesce(nullif(current_setting('test.server_now',true),''),clock_timestamp()::text)::timestamptz $$;`);
 await pg.exec(sql.replace(/\bnow\(\)/g,'private.test_clock()'));
+const reduction=await readFile(new URL('../supabase/migrations/202611250001_fifteen_days.sql',import.meta.url),'utf8');
+await pg.exec(reduction.replace(/\bnow\(\)/g,'private.test_clock()'));
+
 await pg.exec(`insert into auth.users values('${admin}'),('${recipient}'),('${outsider}');insert into public.profiles(id,role) values('${admin}','admin'),('${recipient}','recipient');`);
 const first=await scalar('select id from letters where day=1');const id=first.id;
 ok((await scalar("select count(*)::int n from letters where title='' and content='' and not is_published")).n===24,'24 cartas vacías y privadas');
@@ -26,8 +29,8 @@ await asUser(admin,async()=>{
  await pg.query('select publish_letter($1,(select updated_at from letter_drafts where letter_id=$1))',[id]);
 });
 await pg.exec("update letters set title='Prueba',content='Solo pruebas',is_published=true where day>1;");
-const scenarios=[['2026-11-30T23:59:59-05:00',0],['2026-12-01T04:59:59Z',0],['2026-12-01T05:00:00Z',1],['2026-12-02T04:59:59Z',1],['2026-12-02T05:00:00Z',2],['2026-12-24T05:00:00Z',24],['2027-01-10T00:00:00Z',24],['2032-01-01T00:00:00Z',24]];
-for(const [date,count] of scenarios){await pg.query("select set_config('test.server_now',$1,false)",[date]);await asUser(recipient,async()=>{const result=await scalar('select count(*)::int n from letters');ok(result.n===count,`RLS a ${date}: ${count} cartas`);const state=(await scalar('select calendar_state() state')).state;ok(state.days.filter(d=>d.available).length===count&&state.days.length===24,'metadatos seguros reflejan el desbloqueo');ok(!JSON.stringify(state).includes('Texto privado'),'calendario no filtra textos privados');});}
+const scenarios=[['2026-11-30T23:59:59-05:00',0],['2026-12-01T04:59:59Z',0],['2026-12-01T05:00:00Z',1],['2026-12-02T04:59:59Z',1],['2026-12-02T05:00:00Z',2],['2026-12-15T04:59:59Z',14],['2026-12-15T05:00:00Z',15],['2026-12-24T05:00:00Z',15],['2027-01-10T00:00:00Z',15],['2032-01-01T00:00:00Z',15]];
+for(const [date,count] of scenarios){await pg.query("select set_config('test.server_now',$1,false)",[date]);await asUser(recipient,async()=>{const result=await scalar('select count(*)::int n from letters');ok(result.n===count,`RLS a ${date}: ${count} cartas`);const state=(await scalar('select calendar_state() state')).state;ok(state.days.filter(d=>d.available).length===count&&state.days.length===15,'metadatos seguros reflejan el desbloqueo');ok(!JSON.stringify(state).includes('Texto privado'),'calendario no filtra textos privados');});}
 await pg.exec("select set_config('test.server_now','2026-11-30T23:59:59-05:00',false)");
 await asUser(recipient,async()=>{
  ok((await scalar('select count(*)::int n from storage.objects')).n===0,'fotos futuras invisibles');

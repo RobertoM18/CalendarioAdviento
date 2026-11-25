@@ -1,6 +1,6 @@
 # Diciembre contigo
 
-Calendario privado de 24 cartas del **1 al 24 de diciembre de 2026**, con desbloqueo a medianoche de **America/Guayaquil**. Todas las cartas comienzan vacías y sin publicar. El texto del día 24 y su celebración también los escribes tú.
+Calendario privado de 15 cartas del **1 al 15 de diciembre de 2026**, con desbloqueo a medianoche de **America/Guayaquil**. Todas las cartas comienzan vacías y sin publicar. El texto del día 15 y su celebración también los escribes tú.
 
 ## Arranque local
 
@@ -47,7 +47,7 @@ Alternativa con Supabase CLI: configura el proyecto y usa `supabase db push` par
 
 ## 2. Escribir tus cartas
 
-En **Mis cartas** selecciona un día. Puedes editar título, tipo, texto, dedicatoria, hasta 12 fotografías y una canción. El día 24 incluye un campo adicional de celebración, completamente opcional. Los saltos de línea se conservan y el contenido se representa como texto seguro, sin ejecutar HTML.
+En **Mis cartas** selecciona un día. Puedes editar título, tipo, texto, dedicatoria, hasta 12 fotografías y una canción. El día 15 incluye un campo adicional de celebración, completamente opcional. Los saltos de línea se conservan y el contenido se representa como texto seguro, sin ejecutar HTML.
 
 - **Guardar borrador:** persiste en Supabase; solo tú lo ves.
 - **Previsualizar:** muestra el diseño de la carta sin publicarla ni registrar una lectura.
@@ -62,7 +62,7 @@ Los enlaces de Spotify u otras plataformas se abren con un botón. Los enlaces H
 
 En **Detalles del regalo** cambia bienvenida, nombre, color de acento y mensajes del álbum. Estos cambios se guardan inmediatamente al pulsar Guardar detalles. No alteran el contenido de ninguna carta.
 
-Si llega un día y su carta aún no está publicada, el sobre muestra que está en preparación. No se rellenan cartas con mensajes generados. Después del 24 permanecen accesibles todas las cartas publicadas, también en enero y años posteriores.
+Si llega un día y su carta aún no está publicada, el sobre muestra que está en preparación. No se rellenan cartas con mensajes generados. Después del 15 permanecen accesibles todas las cartas publicadas, también en enero y años posteriores.
 
 ## 3. GitHub y Vercel
 
@@ -144,3 +144,7 @@ Supabase conectado el 24 de noviembre de 2026: migraciones aplicadas al proyecto
 Pendiente: crear las dos cuentas, asignar sus perfiles y probar el acceso autenticado; después conectar el repositorio privado de GitHub y desplegar en Vercel. No se ha publicado todavía un enlace de la aplicación.
 
 Documentación oficial consultada: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Storage privado](https://supabase.com/docs/guides/storage/security/access-control), [Tailwind con Vite](https://tailwindcss.com/docs/installation/using-vite).
+
+## Calendario reducido a 15 días
+
+La experiencia abarca del 1 al 15 de diciembre. El sobre especial está en el día 15. Aplicar `supabase/migrations/202611250001_fifteen_days.sql` después de las migraciones anteriores. Conserva los registros, borradores, fotografías y lecturas de los días 16–24 sin mostrarlos en el calendario ni permitir su acceso a la destinataria. Los mensajes personalizados se conservan; solo se actualizan los textos originales predeterminados.
